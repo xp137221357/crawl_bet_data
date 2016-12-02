@@ -10,8 +10,6 @@
 package com.xixi.bet.utils;
 
 import com.alibaba.fastjson.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,7 +32,7 @@ import java.util.Date;
  */
 public class FileUtil {
 	
-	protected static Logger LOG = LoggerFactory.getLogger(FileUtil.class.getName());
+	protected static String CLASSNAME= "com.xixi.bet.utils.FileUtil";
 	
 	public static String readFile(String filePath){
 		RandomAccessFile aFile = null;
@@ -50,16 +48,16 @@ public class FileUtil {
 			return new String(buf.array());
 		}catch(Throwable e){
 			if(e instanceof FileNotFoundException){
-				LOG.error("文件{}不存在，请检查.",filePath);
+				LoggerUtil.error(CLASSNAME,"文件"+filePath+"不存在，请检查.");
 			}else{
-				LOG.error("",e);
+				LoggerUtil.error(CLASSNAME,e);
 			}
 		}finally{
 			if(aFile != null){
 				try {
 					aFile.close();
 				} catch (IOException e) {
-					LOG.error("",e);
+					LoggerUtil.error(CLASSNAME,e);
 				}
 			}
 			
@@ -67,7 +65,7 @@ public class FileUtil {
 				try {
 					inChannel.close();
 				} catch (IOException e) {
-					LOG.error("",e);
+					LoggerUtil.error(CLASSNAME,e);
 				}
 			}
 		}
@@ -96,13 +94,13 @@ public class FileUtil {
 			ByteBuffer buf = ByteBuffer.wrap(JSONObject.toJSONString(object).getBytes());
 			inChannel.write(buf);
 		}catch(Throwable e){
-			LOG.error("",e);
+			LoggerUtil.error(CLASSNAME,e);
 		}finally{
 			if(aFile != null){
 				try {
 					aFile.close();
 				} catch (IOException e) {
-					LOG.error("",e);
+					LoggerUtil.error(CLASSNAME,e);
 				}
 			}
 			
@@ -110,7 +108,7 @@ public class FileUtil {
 				try {
 					inChannel.close();
 				} catch (IOException e) {
-					LOG.error("",e);
+					LoggerUtil.error(CLASSNAME,e);
 				}
 			}
 		}
@@ -145,7 +143,7 @@ public class FileUtil {
 				crawlDay = Constants.FILE_DATE_FORMAT.get().parse(f.getName());
 				lastCrawlDay = lastCrawlDay == null ? crawlDay : (lastCrawlDay.after(crawlDay) ? lastCrawlDay : crawlDay);
 			}catch(Exception e){
-				LOG.error("",e);
+				LoggerUtil.error(CLASSNAME,e);
 			}
 		}
 		if(lastCrawlDay != null ){

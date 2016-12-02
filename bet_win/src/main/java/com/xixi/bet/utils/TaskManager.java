@@ -15,8 +15,6 @@ import com.alibaba.fastjson.TypeReference;
 import com.xixi.bet.bean.TaskWatermark;
 import com.xixi.bet.dao.TaskWatermarkDao;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -35,7 +33,7 @@ import java.util.List;
  */
 public class TaskManager {
 	
-	protected static Logger LOG = LoggerFactory.getLogger(TaskManager.class.getSimpleName());
+	protected static String CLASSNAME = "com.xixi.bet.utils.TaskManager";
 	
 	public static Date getNextStartUp(Class taskClass){
 		synchronized(TaskManager.class){
@@ -44,7 +42,7 @@ public class TaskManager {
 			params.put("TASK_CLASS", taskClass.getName());
 			List<TaskWatermark> taskWatermarkList = taskWatermarkDao.query(params);
 			if(taskWatermarkList== null || taskWatermarkList.isEmpty()){
-				LOG.error("任务{}不存在",taskClass.getName());
+				LoggerUtil.error(CLASSNAME,"任务不存在："+taskClass.getName());
 				return null;
 			}
 			if(null == taskWatermarkList.get(0).getNextExecute()){
@@ -53,10 +51,10 @@ public class TaskManager {
 
 			if(taskWatermarkList.get(0).getNextExecute().before(DateUtil.getStockRealDate()) ||
 					taskWatermarkList.get(0).getNextExecute().equals(DateUtil.getStockRealDate())){
-				LOG.info("任务{}-{}开始执行; 理论下次开始时间{};当前时间{}",taskClass.getName(), taskWatermarkList.get(0).getTaskName(), Constants.FILE_DATE_FORMAT.get().format(taskWatermarkList.get(0).getNextExecute()), Constants.FILE_DATE_FORMAT.get().format(DateUtil.getStockRealDate()));
+				LoggerUtil.info(CLASSNAME,"任务"+taskClass.getName()+"-"+taskWatermarkList.get(0).getTaskName()+"开始执行; 理论下次开始时间"+Constants.FILE_DATE_FORMAT.get().format(taskWatermarkList.get(0).getNextExecute())+";当前时间"+Constants.FILE_DATE_FORMAT.get().format(DateUtil.getStockRealDate()));
 				return taskWatermarkList.get(0).getNextExecute();
 			}else{
-				LOG.info("任务{}-{}已经完成,等待下一次再执行",taskClass.getName(), taskWatermarkList.get(0).getTaskName());
+				LoggerUtil.info(CLASSNAME,"任务"+taskClass.getName()+"-"+taskWatermarkList.get(0).getTaskName()+"已经完成,等待下一次再执行");
 				return null;
 			}
 		}
@@ -79,7 +77,7 @@ public class TaskManager {
 		params.put("TASK_CLASS", taskClass.getName());
 		List<TaskWatermark> taskWatermarkList = taskWatermarkDao.query(params);
 		if(taskWatermarkList== null || taskWatermarkList.isEmpty()){
-			LOG.error("任务{}不存在",taskClass.getName());
+			LoggerUtil.error(CLASSNAME,"任务不存在："+taskClass.getName());
 			return ;
 		}
 		TaskWatermark TaskWatermark = taskWatermarkList.get(0);
@@ -105,7 +103,7 @@ public class TaskManager {
 				}else if(taskWatermark.getPeriodUnit().equalsIgnoreCase("month")){
 					NEXT_EXECUTE = DateUtil.dateCalculate(lastExecuted, taskWatermark.getPeriodValue(), Calendar.MONDAY);
 				}else{
-					LOG.error("当前没有被考虑的或者非法的任务周期单位");
+					LoggerUtil.error(CLASSNAME,"当前没有被考虑的或者非法的任务周期单位");
 					return;
 				}
 			}
@@ -114,7 +112,7 @@ public class TaskManager {
 			params.put("LAST_EXECUTED", lastExecuted);
 			int updateRows = taskWatermarkDao.updateExecutedTimeByTaskClass(params);
 			if(updateRows > 0){
-				LOG.info("任务{}完成并更新到数据库",taskClass.getName());
+				LoggerUtil.info(CLASSNAME,"任务{}完成并更新到数据库"+taskClass.getName());
 			}
 		}
 	}
@@ -133,11 +131,11 @@ public class TaskManager {
 					try {
 						lastExecutedDateDT = Constants.FILE_DATE_FORMAT.get().parse(lastExecutedDate);
 					} catch (Exception e1) {
-						LOG.error("该任务{}上次执行时保存的日期格式不符合规范{}",taskClass.getName(), lastExecutedDate,e1);
+						LoggerUtil.error(CLASSNAME,"该任务"+taskClass.getName()+"上次执行时保存的日期格式不符合规范{}"+ lastExecutedDate,e1);
 					}
 					if(lastExecutedDateDT != null){
 						if(!DateUtil.date1IsBeforeDate2(lastExecutedDateDT, realDate)){
-							LOG.info("任务{}已经执行完成，不再启动", SysConfig.getProperty(taskClass.getName(), taskClass.getName()));
+							LoggerUtil.info(CLASSNAME,"任务"+SysConfig.getProperty(taskClass.getName()+"已经执行完成，不再启动"+taskClass.getName()));
 							return null;
 						}
 					}else{
@@ -145,17 +143,17 @@ public class TaskManager {
 					}
 				}
 			}
-			LOG.info("开始执行任务{}", SysConfig.getProperty(taskClass.getName(), taskClass.getName()));
+			LoggerUtil.info(CLASSNAME,"开始执行任务"+ SysConfig.getProperty(taskClass.getName()+";task class name:"+taskClass.getName()));
 			return realDate;
 		}catch(JSONException e){
-			LOG.error("",e);
-			LOG.info("开始执行任务{}", SysConfig.getProperty(taskClass.getName(), taskClass.getName()));
+			LoggerUtil.error(CLASSNAME,"任务管理异常",e);
+			LoggerUtil.info(CLASSNAME,"开始执行任务"+SysConfig.getProperty(taskClass.getName()+";task class name:"+taskClass.getName()));
 			return realDate;
 		}
 	}
 
 	public static void isStartUpNewTask_end(Class taskClass, Date realDate){
-		LOG.info("任务：{}执行完成", SysConfig.getProperty(taskClass.getName(), taskClass.getName()));
+		LoggerUtil.info(CLASSNAME,"任务："+SysConfig.getProperty(taskClass.getName(), taskClass.getName())+"执行完成");
 		String content = FileUtil.readFile(SysConfig.getProperty("data.persistence.rootpath") + SysConfig.getProperty("data.persistence.task.dairy"));
 		HashMap<String, String> tasks;
 		if(StringUtils.isEmpty(content)){
@@ -165,7 +163,7 @@ public class TaskManager {
 		}
 		tasks.put(taskClass.getName(), Constants.FILE_DATE_FORMAT.get().format(realDate));
 		FileUtil.serializeObjByJson(SysConfig.getProperty("data.persistence.rootpath") + SysConfig.getProperty("data.persistence.task.dairy"), tasks, true);
-		LOG.info("任务：{}执行完成且保存到日志文件，已保存到{}的数据", SysConfig.getProperty(taskClass.getName(), taskClass.getName()), Constants.FILE_DATE_FORMAT.get().format(realDate));
+		LoggerUtil.info(CLASSNAME,"任务："+SysConfig.getProperty(taskClass.getName(), taskClass.getName())+"执行完成且保存到日志文件，已保存到"+Constants.FILE_DATE_FORMAT.get().format(realDate)+"的数据");
 	}
 	
 }
