@@ -58,7 +58,7 @@ public class QiutanData {
 			//获取下次启动该任务的时间,数据库，可配置
 			Date nextTime = TaskManager.getNextStartUp(this.getClass());
 			/*if(null == nextTime){
-				LOG.info("---xiaopan-----return");
+				LoggerUtil.info(CLASSNAME,"---xiaopan-----return");
 				return;
 			}*/
 
