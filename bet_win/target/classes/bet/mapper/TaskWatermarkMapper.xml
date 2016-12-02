@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xixi.bet.dao.TaskWatermarkDao">
+	<select id="query" parameterType="map" resultType="com.xixi.bet.bean.TaskWatermark">
+		select TASK_NAME taskName,
+			TASK_CLASS taskClass,
+			CRON_EXPRESS cronExpress,
+			LAST_EXECUTED lastExecuted,
+			NEXT_EXECUTE nextExecute,
+			REMARK remark,
+			PERIOD_VALUE periodValue,
+			PERIOD_UNIT periodUnit
+		from test.task_watermark
+		<where>
+			<if test="TASK_CLASS != null">
+				AND TASK_CLASS = #{TASK_CLASS}
+			</if>
+		</where>
+	</select>
+	
+	<select id="queryIsActive" parameterType="map" resultType="com.xixi.bet.bean.TaskWatermark">
+		select TASK_NAME taskName,
+			TASK_CLASS taskClass,
+			CRON_EXPRESS cronExpress,
+			LAST_EXECUTED lastExecuted,
+			NEXT_EXECUTE nextExecute,
+			REMARK remark,
+			PERIOD_VALUE periodValue,
+			PERIOD_UNIT periodUnit
+		from test.task_watermark
+		<where>
+			<if test="TASK_CLASS != null">
+				AND TASK_CLASS = #{TASK_CLASS}
+			</if>
+			<if test="TASK_CLASS != null">
+				<![CDATA[ NEXT_EXECUTE < now() ]]>
+			</if>
+		</where>
+	</select>
+	
+	<insert id="merge" parameterType="com.xixi.bet.bean.TaskWatermark">
+		INSERT INTO test.task_watermark(
+			TASK_NAME,
+			TASK_CLASS, 
+			CRON_EXPRESS, 
+			LAST_EXECUTED, 
+			NEXT_EXECUTE)
+		VALUES(
+			#{taskName},
+			#{taskClass},
+			#{cronExpress},
+			#{lastExecuted},
+			#{nextExecute}
+		) ON DUPLICATE KEY UPDATE 
+			LAST_EXECUTED = VALUES(LAST_EXECUTED),
+			NEXT_EXECUTE = VALUES(NEXT_EXECUTE)
+	</insert>
+	
+	<update id="updateExecutedTimeByTaskClass" parameterType="map">
+		UPDATE test.task_watermark
+		SET LAST_EXECUTED = #{LAST_EXECUTED},
+			NEXT_EXECUTE = #{NEXT_EXECUTE}
+		WHERE  TASK_CLASS = #{TASK_CLASS}
+	</update>
+	
+	<update id="updateExecutedTimeByTask" parameterType="com.xixi.bet.bean.TaskWatermark">
+		UPDATE test.task_watermark
+		SET LAST_EXECUTED = #{NEXT_EXECUTE}
+			NEXT_EXECUTE = date_add(#{NEXT_EXECUTE}, interval ${PERIOD_VALUE} ${PERIOD_UNIT})
+		WHERE  TASK_CLASS = #{TASK_CLASS}
+	</update>
+	
+	<select id="taskReport" resultType="com.xixi.bet.bean.TaskWatermark">
+			select TASK_NAME taskName,
+			TASK_CLASS taskClass,
+			CRON_EXPRESS cronExpress,
+			LAST_EXECUTED lastExecuted,
+			NEXT_EXECUTE nextExecute,
+			REMARK remark,
+			PERIOD_VALUE periodValue,
+			PERIOD_UNIT periodUnit
+			from test.task_watermark
+	</select>
+</mapper>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation=" 
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context-4.1.xsd
+            http://www.springframework.org/schema/task  
+            http://www.springframework.org/schema/task/spring-task-4.1.xsd">
+	<bean class="com.xixi.bet.utils.SpringContextUtil" scope="singleton" />
+	<bean id="sysConfig" class="com.xixi.bet.utils.SysConfig">
+		<property name="fileEncoding" value="UTF-8" />
+		<property name="locations">
+			<list>
+				<value>classpath*:config_*.properties</value>
+				<value>file:bet_win/config/config_*.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<import resource="classpath:applicationContext-mybatis.xml" />
+	
+	<!-- 注解基目录 -->
+	<context:component-scan base-package="com.viki" >
+	</context:component-scan>
+	
+	<!-- 公用线程池 -->
+	<bean id="commonThreadPoolExecutor" class ="java.util.concurrent.ThreadPoolExecutor">
+        <constructor-arg index="0" value="5"/>
+        <constructor-arg index="1" value="5"/>
+        <constructor-arg index="2" value="2000"/>
+        <constructor-arg index="3" value="SECONDS" type="java.util.concurrent.TimeUnit"  />
+        <constructor-arg index="4" ref="blockingQueue" type="java.util.concurrent.BlockingQueue"/>
+        <constructor-arg index="5" ref="customThreadFactory" />
+    </bean>
+    <bean id="blockingQueue" class="java.util.concurrent.ArrayBlockingQueue">
+        <constructor-arg index="0" value="1000000"/>
+    </bean>
+    <bean id="customThreadFactory" class="com.xixi.bet.utils.CustomThreadFactory" scope="singleton" />
+</beans>

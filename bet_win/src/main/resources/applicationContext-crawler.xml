@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:task="http://www.springframework.org/schema/task" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/task
+            spring-task-4.1.xsd">
+
+<task:scheduler id="ext_task_group" pool-size="10"/>
+<task:scheduled-tasks scheduler="ext_task_group" >
+	<!--<task:scheduled ref="qiutan-data-obtain" method="run" cron="0 0 20 * * ?" remark="球探获取数据-测试"/>-->
+	<task:scheduled ref="qiutan-data-obtain" method="run" fixed-delay="10000" remark="球探获取数据-测试"/>
+</task:scheduled-tasks>
+
+<bean id="qiutan-data-obtain" class="com.xixi.bet.crawler.QiutanData"></bean>
+
+</beans>
