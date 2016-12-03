@@ -3,14 +3,14 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.xixi.bet.dao.QiutanDataDao">
+<mapper namespace="com.xixi.bet.dao.QiutanFootballDataDao">
 
 	<select id="queryQiutanMaxScheduleID" parameterType="map" resultType="HashMap">
-		select max(schedule_id) schedule_id from test.t_bet_match_info
+		select max(schedule_id) schedule_id from test.t_bet_match_football_info
 	</select>
 
-	<insert id="insertQiutanData" parameterType="com.xixi.bet.bean.QiutanDataBean">
-		INSERT INTO test.t_bet_match_data(
+	<insert id="insertQiutanData" parameterType="com.xixi.bet.bean.QiutanFootballDataBean">
+		INSERT INTO test.t_bet_match_football_data(
 		schedule_id,
 		value0,
 		value1,
@@ -30,7 +30,12 @@
 		value15,
 		value16,
 		value17,
-		value18
+		value18,
+		value19,
+		value20,
+		value21,
+		value22,
+		value23
 		)
 		VALUES(
 		#{schedule_id},
@@ -52,7 +57,12 @@
 		#{value15},
 		#{value16},
 		#{value17},
-		#{value18}
+		#{value18},
+		#{value19},
+		#{value20},
+		#{value21},
+		#{value22},
+		#{value23}
 		) ON DUPLICATE KEY UPDATE
 		value2 = VALUES(value2),
 		value3 = VALUES(value3),
@@ -70,11 +80,16 @@
 		value15 = VALUES(value15),
 		value16 = VALUES(value16),
 		value17 = VALUES(value17),
-		value18 = VALUES(value18)
+		value18 = VALUES(value18),
+		value19 = VALUES(value19),
+		value20 = VALUES(value20),
+		value21 = VALUES(value21),
+		value22 = VALUES(value22),
+		value23 = VALUES(value23)
 	</insert>
 
-	<insert id="insertQiutanMatchInfo" parameterType="com.xixi.bet.bean.QiutanMatchInfoBean">
-		INSERT INTO test.t_bet_match_info(
+	<insert id="insertQiutanMatchInfo" parameterType="com.xixi.bet.bean.QiutanFootballMatchInfoBean">
+		INSERT INTO test.t_bet_match_football_info(
 		schedule_id,
 		match_name,
 		match_name_cn,
@@ -85,6 +100,9 @@
 		guest_team_cn,
 		home_team_id,
 		guest_team_id,
+		home_order,
+		guest_order,
+		neutrality,
 		season
 		)
 		VALUES(
@@ -98,6 +116,9 @@
 		#{guest_team_cn},
 		#{home_team_id},
 		#{guest_team_id},
+		#{home_order},
+		#{guest_order},
+		#{neutrality},
 		#{season}
 		) ON DUPLICATE KEY UPDATE
 		match_name = VALUES(match_name),
@@ -108,6 +129,9 @@
 		home_team_cn = VALUES(home_team_cn),
 		home_team_id = VALUES(home_team_id),
 		guest_team_id = VALUES(guest_team_id),
+		home_order = VALUES(home_order),
+		guest_order = VALUES(guest_order),
+		neutrality = VALUES(neutrality),
 		season = VALUES(season)
 	</insert>
 </mapper>

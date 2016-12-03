@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LoggerUtil {
 
-    private static boolean DEBUG=true;
+    private static final boolean DEBUG=false;
     public static void error(String className,String reason,Throwable e){
         Logger LOG = LoggerFactory.getLogger(className);
         String title="An error occurred when excute "+className;
@@ -27,37 +27,36 @@ public class LoggerUtil {
 
     public static void error(String className,String reason){
 
-        error(className,reason,null);
+        error(reason);
     }
 
-    public static void error(String className,Throwable e){
+    public static void error(String reason,Throwable e){
 
-        error(className,"---",e);
+        error(reason,e);
     }
 
     public static void error(String reason){
-
-        error("className",reason,null);
+        error(reason);
     }
 
     public static void info(String className,String content){
         Logger LOG = LoggerFactory.getLogger(className);
         if(DEBUG) {
-            LOG.info(className, content);
+            LOG.info(content);
         }
     }
 
     public static void warn(String className,String content){
         Logger LOG = LoggerFactory.getLogger(className);
         if(DEBUG) {
-            LOG.warn(className, content);
+            LOG.warn(content);
         }
     }
 
     public static void debug(String className,String content){
         Logger LOG = LoggerFactory.getLogger(className);
         if(DEBUG) {
-            LOG.debug(className, content);
+            LOG.debug(content);
         }
     }
 

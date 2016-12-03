@@ -3,10 +3,10 @@ package com.xixi.bet.utils;
 /**
  * Created by Administrator on 2016/12/2.
  */
-public class BetDataValidate {
+public class BasketballDataValidate {
 
     
-    public int validateBetData(String str) {
+    public int validateBasketballData(String str) {
         if(str==null||str.indexOf("game=Array")<0){
             return -1;
         }

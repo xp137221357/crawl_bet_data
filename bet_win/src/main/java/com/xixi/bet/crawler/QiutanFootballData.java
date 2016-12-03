@@ -9,9 +9,9 @@
   
 package com.xixi.bet.crawler;
 
-import com.xixi.bet.bean.QiutanDataBean;
-import com.xixi.bet.bean.QiutanMatchInfoBean;
-import com.xixi.bet.dao.QiutanDataDao;
+import com.xixi.bet.bean.QiutanFootballDataBean;
+import com.xixi.bet.bean.QiutanFootballMatchInfoBean;
+import com.xixi.bet.dao.QiutanFootballDataDao;
 import com.xixi.bet.utils.*;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
@@ -28,33 +28,34 @@ import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**  
- * ClassName:QiutanData <br/>
+ * ClassName:QiutanFootballData <br/>
  * @version    
  * @since    JDK 1.7  
  * @see        
  */
-public class QiutanData {
+public class QiutanFootballData {
 	
-	protected static String CLASSNAME="com.xixi.bet.crawler.QiutanData";
+	protected static String CLASSNAME="com.xixi.bet.crawler.QiutanFootballData";
 	private int sleepTime=100;
 	private static final int ONE_SECOND=1000;
-	
+
 	@Autowired
-	@Qualifier("qiutanDataDao")
-	private QiutanDataDao qiutanDataDao;
+	@Qualifier("qiutanFootballDataDao")
+	private QiutanFootballDataDao qiutanFootballDataDao;
 
 	@Autowired
 	@Qualifier("commonThreadPoolExecutor")
 	private ThreadPoolExecutor commonThreadPoolExecutor;
 
-	public void run(){
+
+	public void run() {
 		try{
 			//如果是本地的机器，则复制云服务器上的数据后直接返回
 			if(SysConfig.getProperty("machine.flag.is.in.local", "false").equals("true")){
 				//copyFromCloudMachine();
 				return;
 			}
-			
+
 			//获取下次启动该任务的时间,数据库，可配置
 			Date nextTime = TaskManager.getNextStartUp(this.getClass());
 			/*if(null == nextTime){
@@ -65,19 +66,19 @@ public class QiutanData {
 			ScriptEngineManager manager = new ScriptEngineManager();
 			ScriptEngine engine = manager.getEngineByName("js");
 
-			HashMap map=qiutanDataDao.queryQiutanMaxScheduleID();
-			Long minNumber=new Long(256999);
+			HashMap map=qiutanFootballDataDao.queryQiutanMaxScheduleID();
+			Long minNumber=new Long(1247480);
 			Long orderNumber= map==null?minNumber:(Long) map.get("schedule_id");
 			orderNumber=orderNumber>minNumber?orderNumber:minNumber;
-			LoggerUtil.info(CLASSNAME,"---xiaopan-----orderNumber1111111="+orderNumber);
-            int tryNumber=0;
+			int tryNumber=0;
 			while(true) {
+				LoggerUtil.info(CLASSNAME,"---xiaopan---orderNumber="+orderNumber);
 				orderNumber++;
-				if(sleepTime>1000){
+				if(sleepTime>ONE_SECOND){
 					sleepTime=100;
 				}
-				Thread.sleep(100);
-				String url = String.format(SysConfig.getProperty("qiutan.basketball.url.formatter"), orderNumber);
+				Thread.sleep(sleepTime);
+				String url = String.format(SysConfig.getProperty("qiutan.football.url.formatter"), orderNumber);
 				Elements urlEles = getUrlConnect(url, "script");
 				if(urlEles==null || urlEles.size()==0){
 					if(tryNumber>10){
@@ -91,12 +92,11 @@ public class QiutanData {
 				String targetUrl = "";
 				for (Element ele : urlEles) {
 					String str = ele.select("script").get(0).attr("src");
-					if (str.contains("/data1x2/")) {
+					if (str.contains("/1x2.nowscore.com/")) {
 						targetUrl = str;
 						break;
 					}
 				}
-				targetUrl = "http://nba.win007.com" + targetUrl;
 				try {
 					Elements eles = getUrlConnect(targetUrl, "body");
 					if (eles==null || eles.size() == 0 || eles.get(0).html().equals("")) {
@@ -107,46 +107,46 @@ public class QiutanData {
 							continue;
 						}
 						String content = ele.select("body").html();
-						BasketballDataValidate betDataValidate = new BasketballDataValidate();
-						int resutlValidate = betDataValidate.validateBasketballData(content);
+						FootballDataValidate footballDataValidate = new FootballDataValidate();
+						int resutlValidate = footballDataValidate.validateFootballData(content);
 						if (resutlValidate < 0) {
 							LoggerUtil.error(CLASSNAME, "数据验证发生错误");
 							return;
 						}
 						String[] itemArr = parseQiutanData(content, engine);
 						String[] itemInfoArr = parseMatchInfo(content, engine);
-						String scheduleID = itemInfoArr[3];
-						itemInfoArr[2] = parseTime(itemInfoArr[2]);
+						String scheduleID = itemInfoArr[6];
+						itemInfoArr[5] = parseTime(itemInfoArr[5]);
 						if (itemArr == null || itemArr.length == 0) {
 							continue;
 						}
 						for (String str : itemArr) {
-							if (getWordsCount(str, "|") != 19) {
+							if (getWordsCount(str, "|") != 23) {
 								continue;
 							}
 							String[] strArr = str.split("\\|");
-							strArr[15] = parseTime(strArr[15]);
-							qiutanDataDao.insertQiutanData(transQiutanArrToQiutanData(strArr, scheduleID));
+							strArr[20] = parseTime(strArr[20]);
+							qiutanFootballDataDao.insertQiutanData(transQiutanArrToQiutanData(strArr, scheduleID));
 						}
-						qiutanDataDao.insertQiutanMatchInfo(transQiutanMatchArrToQiutanMatchInfo(itemInfoArr));
+						qiutanFootballDataDao.insertQiutanMatchInfo(transQiutanMatchArrToQiutanMatchInfo(itemInfoArr));
 					}
 				} catch (Throwable e) {
 					LoggerUtil.error(CLASSNAME, "爬取出错" + url, e);
-					try {
-						Thread.sleep(10*ONE_SECOND);
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
-					}
-					sleepTime=sleepTime+100;
 				}
 			}
-            // 文件持久化设置
+			// 文件持久化设置
 			/*FileUtil.serializeObjByJson(SysConfig.getProperty("data.persistence.rootpath") +
 					SysConfig.getProperty("data.persistence.subpath.cmfb")
 					.replace("{date}", Constants.FILE_DATE_FORMAT.get().format(DateUtil.getStockRealDate())), CMFBBeanList);*/
-            //TaskManager.refreshTaskWatermark(getClass(), DateUtil.getStockRealDate());
+			//TaskManager.refreshTaskWatermark(getClass(), DateUtil.getStockRealDate());
 		}catch(Throwable e){
 			LoggerUtil.error(CLASSNAME,"爬取球探数据时发生异常:",e);
+			try {
+				Thread.sleep(10*ONE_SECOND);`
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
+			sleepTime=sleepTime+100;
 		}
 	}
 
@@ -157,16 +157,17 @@ public class QiutanData {
 		doc = JsoupUtil.crawlPage(url);
 		return doc.select(elem);
 	}
-	
-	/**  
+
+	/**
 	 * methodName: parseQiutanData
 	 *
 	 * @return
-	 * @throws ScriptException   
+	 * @throws ScriptException
 	 */
 	private String[] parseQiutanData(String content,ScriptEngine engine) throws ScriptException{
 		//engine.eval(content.split(";")[0]);
 		//String items = (String) engine.get("matchname");
+		int flag=0;
 		int positionStart=content.indexOf("game=Array");
 		int positionEnd=content.indexOf("gameDetail=Array");
 		if(positionStart==positionEnd){
@@ -184,8 +185,9 @@ public class QiutanData {
 	 * @throws ScriptException
 	 */
 	private String[] parseMatchInfo(String content,ScriptEngine engine) throws ScriptException{
-        //engine.eval(content.split(";")[0]);
-        //String items = (String) engine.get("matchname");
+		//engine.eval(content.split(";")[0]);
+		//String items = (String) engine.get("matchname");
+		int flag=0;
 		int position=content.indexOf("game=Array");
 		String matchInfo=content.substring(0,position).replaceAll("\"", "");
 		String[] itemArr = matchInfo.split(";");
@@ -198,19 +200,19 @@ public class QiutanData {
 		}
 		return strArr;
 	}
-	
-	
-	/**  
+
+
+	/**
 	 * methodName: transQiutanArrToQiutanData
 	 *
-	 * 转换<br/>    
-	 *   
+	 * 转换<br/>
+	 *
 	 * @param itemArr
-	 * @return   
+	 * @return
 	 */
-	
-	private QiutanDataBean transQiutanArrToQiutanData(String[] itemArr,String scheduleID){
-		QiutanDataBean qiutanDataBean=new QiutanDataBean();
+
+	private QiutanFootballDataBean transQiutanArrToQiutanData(String[] itemArr,String scheduleID){
+		QiutanFootballDataBean qiutanDataBean=new QiutanFootballDataBean();
 		for(int i=0;i<itemArr.length;i++){
 			if(itemArr[i].equals("")){
 				itemArr[i]="-1";
@@ -224,42 +226,50 @@ public class QiutanData {
 		qiutanDataBean.setValue4(itemArr[5]);
 		qiutanDataBean.setValue5(itemArr[6]);
 		qiutanDataBean.setValue6(itemArr[7]);
-		qiutanDataBean.setValue7(itemArr[8]);
-		qiutanDataBean.setValue8(itemArr[9]);
-		qiutanDataBean.setValue9(itemArr[10]);
-		qiutanDataBean.setValue10(itemArr[11]);
-		qiutanDataBean.setValue11(itemArr[12]);
-		qiutanDataBean.setValue12(itemArr[13]);
-		qiutanDataBean.setValue13(itemArr[14]);
-		qiutanDataBean.setValue14(itemArr[15]);
-		qiutanDataBean.setValue15(itemArr[16]);
-		qiutanDataBean.setValue16(itemArr[17]);
-		qiutanDataBean.setValue17(itemArr[18]);
-		qiutanDataBean.setValue18(itemArr[19]);
+		qiutanDataBean.setValue7(itemArr[7]);
+		qiutanDataBean.setValue8(itemArr[8]);
+		qiutanDataBean.setValue9(itemArr[9]);
+		qiutanDataBean.setValue10(itemArr[10]);
+		qiutanDataBean.setValue11(itemArr[11]);
+		qiutanDataBean.setValue12(itemArr[12]);
+		qiutanDataBean.setValue13(itemArr[13]);
+		qiutanDataBean.setValue14(itemArr[14]);
+		qiutanDataBean.setValue15(itemArr[15]);
+		qiutanDataBean.setValue16(itemArr[16]);
+		qiutanDataBean.setValue17(itemArr[17]);
+		qiutanDataBean.setValue18(itemArr[18]);
+		qiutanDataBean.setValue19(itemArr[19]);
+		qiutanDataBean.setValue20(itemArr[20]);
+		qiutanDataBean.setValue21(itemArr[21]);
+		qiutanDataBean.setValue22(itemArr[22]);
+		qiutanDataBean.setValue23(itemArr[23]);
 		return qiutanDataBean;
 	}
 
-	private QiutanMatchInfoBean transQiutanMatchArrToQiutanMatchInfo(String[] itemArr){
+	private QiutanFootballMatchInfoBean transQiutanMatchArrToQiutanMatchInfo(String[] itemArr){
 
-		QiutanMatchInfoBean qiutanMatchInfoBean= new QiutanMatchInfoBean();
+		QiutanFootballMatchInfoBean qiutanMatchInfoBean= new QiutanFootballMatchInfoBean();
 
 		qiutanMatchInfoBean.setMatch_name(itemArr[0]);
 		qiutanMatchInfoBean.setMatch_name_cn(itemArr[1]);
-		qiutanMatchInfoBean.setMatch_time(itemArr[2]);
-		qiutanMatchInfoBean.setSchedule_id(itemArr[3]);
-		qiutanMatchInfoBean.setHome_team(itemArr[4]);
-		qiutanMatchInfoBean.setGuest_team(itemArr[5]);
-		qiutanMatchInfoBean.setHome_team_cn(itemArr[6]);
-		qiutanMatchInfoBean.setGuest_team_cn(itemArr[7]);
-		qiutanMatchInfoBean.setHome_team_id(itemArr[8]);
-		qiutanMatchInfoBean.setGuest_team_id(itemArr[9]);
-		qiutanMatchInfoBean.setSeason(itemArr[10]);
+		qiutanMatchInfoBean.setMatch_time(itemArr[5]);
+		qiutanMatchInfoBean.setSchedule_id(itemArr[6]);
+		qiutanMatchInfoBean.setHome_team(itemArr[7]);
+		qiutanMatchInfoBean.setGuest_team(itemArr[8]);
+		qiutanMatchInfoBean.setHome_team_cn(itemArr[9]);
+		qiutanMatchInfoBean.setGuest_team_cn(itemArr[10]);
+		qiutanMatchInfoBean.setHome_team_id(itemArr[17]);
+		qiutanMatchInfoBean.setGuest_team_id(itemArr[18]);
+		qiutanMatchInfoBean.setHome_order(itemArr[19]);
+		qiutanMatchInfoBean.setGuest_order(itemArr[20]);
+		qiutanMatchInfoBean.setNeutrality(itemArr[21]);
+		qiutanMatchInfoBean.setSeason(itemArr[22]);
 
 		return qiutanMatchInfoBean;
 	}
 
 	public static void main(String[] args){
-		new QiutanData().run();
+		new QiutanFootballData().run();
 	}
 
 	/**

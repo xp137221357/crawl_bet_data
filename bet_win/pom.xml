@@ -133,7 +133,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>com.xixi.bet.BetBootstrap</mainClass>
+							<mainClass>com.xixi.bet_win.BetBootstrap</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

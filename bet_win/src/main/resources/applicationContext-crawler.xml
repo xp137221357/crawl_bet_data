@@ -10,9 +10,11 @@
 <task:scheduler id="ext_task_group" pool-size="10"/>
 <task:scheduled-tasks scheduler="ext_task_group" >
 	<!--<task:scheduled ref="qiutan-data-obtain" method="run" cron="0 0 20 * * ?" remark="球探获取数据-测试"/>-->
-	<task:scheduled ref="qiutan-data-obtain" method="run" fixed-delay="10000" remark="球探获取数据-测试"/>
+	<!--<task:scheduled ref="qiutan-basketball-data-obtain" method="run" fixed-delay="3600000" remark="球探获取数据-测试"/>-->
+	<task:scheduled ref="qiutan-football-data-obtain" method="run" fixed-delay="3600000" remark="球探获取数据-测试"/>
 </task:scheduled-tasks>
 
-<bean id="qiutan-data-obtain" class="com.xixi.bet.crawler.QiutanData"></bean>
+<bean id="qiutan-basketball-data-obtain" class="com.xixi.bet.crawler.QiutanData"></bean>
+<bean id="qiutan-football-data-obtain" class="com.xixi.bet.crawler.QiutanFootballData"></bean>
 
 </beans>
