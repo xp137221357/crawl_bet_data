@@ -77,9 +77,9 @@ public class QiutanData {
 					sleepTime=100;
 				}
 				Thread.sleep(100);
-				String url = String.format(SysConfig.getProperty("qiutan.basketball.url.formatter"), orderNumber);
-				Elements urlEles = getUrlConnect(url, "script");
-				if(urlEles==null || urlEles.size()==0){
+
+				String targetUrl = getTargetUrl(orderNumber);
+				if(targetUrl==null || targetUrl.equals("")){
 					if(tryNumber>10){
 						return;
 					}else{
@@ -88,19 +88,17 @@ public class QiutanData {
 					}
 				}
 				tryNumber=0;
-				String targetUrl = "";
-				for (Element ele : urlEles) {
-					String str = ele.select("script").get(0).attr("src");
-					if (str.contains("/data1x2/")) {
-						targetUrl = str;
-						break;
-					}
-				}
+
 				targetUrl = "http://nba.win007.com" + targetUrl;
 				try {
 					Elements eles = getUrlConnect(targetUrl, "body");
 					if (eles==null || eles.size() == 0 || eles.get(0).html().equals("")) {
-						return;
+						if(tryNumber>10){
+							return;
+						}else{
+							tryNumber++;
+							continue;
+						}
 					}
 					for (Element ele : eles) {
 						if (!ele.html().contains("game=Array")) {
@@ -131,7 +129,7 @@ public class QiutanData {
 						qiutanDataDao.insertQiutanMatchInfo(transQiutanMatchArrToQiutanMatchInfo(itemInfoArr));
 					}
 				} catch (Throwable e) {
-					LoggerUtil.error(CLASSNAME, "爬取出错" + url, e);
+					LoggerUtil.error(CLASSNAME, "爬取出错" + targetUrl, e);
 					try {
 						Thread.sleep(10*ONE_SECOND);
 					} catch (InterruptedException e1) {
@@ -156,6 +154,29 @@ public class QiutanData {
 		conn.header("referer", "http://www.win007.com/");
 		doc = JsoupUtil.crawlPage(url);
 		return doc.select(elem);
+	}
+
+	private String getTargetUrl(Long orderNumber){
+
+		String targetUrl=null;
+		try {
+			String url = String.format(SysConfig.getProperty("qiutan.basketball.url.formatter"), orderNumber);
+			Elements urlEles = null;
+			urlEles = getUrlConnect(url, "script");
+			if(urlEles==null || urlEles.size()==0){
+				return null;
+			}
+			for (Element ele : urlEles) {
+				String str = ele.select("script").get(0).attr("src");
+				if (str.contains("/data1x2/")) {
+					targetUrl = str;
+					break;
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return targetUrl;
 	}
 	
 	/**  
