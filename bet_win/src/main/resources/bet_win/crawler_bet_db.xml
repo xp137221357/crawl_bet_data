@@ -19,8 +19,8 @@
 		<property name="configLocation" value="classpath:mybatis-config.xml" />
 		<property name="mapperLocations">
 			<list>
-				<value>classpath*:bet/mapper/Bet*.xml</value>
-				<value>classpath*:bet/mapper/TaskWatermarkMapper.xml</value>
+				<value>classpath*:bet_win/mapper/Bet*.xml</value>
+				<value>classpath*:bet_win/mapper/TaskWatermarkMapper.xml</value>
 			</list>
 		</property>
 	</bean>

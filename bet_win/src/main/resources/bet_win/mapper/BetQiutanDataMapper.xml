@@ -6,11 +6,11 @@
 <mapper namespace="com.xixi.bet.dao.QiutanDataDao">
 
 	<select id="queryQiutanMaxScheduleID" parameterType="map" resultType="HashMap">
-		select max(schedule_id) schedule_id from test.t_bet_match_info
+		select max(schedule_id) schedule_id from test.t_bet_match_basketball_info
 	</select>
 
 	<insert id="insertQiutanData" parameterType="com.xixi.bet.bean.QiutanDataBean">
-		INSERT INTO test.t_bet_match_data(
+		INSERT INTO test.t_bet_match_basketball_data(
 		schedule_id,
 		value0,
 		value1,
@@ -74,7 +74,7 @@
 	</insert>
 
 	<insert id="insertQiutanMatchInfo" parameterType="com.xixi.bet.bean.QiutanMatchInfoBean">
-		INSERT INTO test.t_bet_match_info(
+		INSERT INTO test.t_bet_match_basketball_info(
 		schedule_id,
 		match_name,
 		match_name_cn,

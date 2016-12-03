@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LoggerUtil {
 
-    private static boolean DEBUG=true;
+    private static final boolean DEBUG=false;
     public static void error(String className,String reason,Throwable e){
         Logger LOG = LoggerFactory.getLogger(className);
         String title="An error occurred when excute "+className;
@@ -36,7 +36,6 @@ public class LoggerUtil {
     }
 
     public static void error(String reason){
-
         error(reason);
     }
 

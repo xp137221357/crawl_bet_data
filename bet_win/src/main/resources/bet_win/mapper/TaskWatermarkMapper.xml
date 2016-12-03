@@ -12,7 +12,7 @@
 			REMARK remark,
 			PERIOD_VALUE periodValue,
 			PERIOD_UNIT periodUnit
-		from test.task_watermark
+		from test.t_crawler_task_watermark
 		<where>
 			<if test="TASK_CLASS != null">
 				AND TASK_CLASS = #{TASK_CLASS}
@@ -29,7 +29,7 @@
 			REMARK remark,
 			PERIOD_VALUE periodValue,
 			PERIOD_UNIT periodUnit
-		from test.task_watermark
+		from test.t_crawler_task_watermark
 		<where>
 			<if test="TASK_CLASS != null">
 				AND TASK_CLASS = #{TASK_CLASS}
@@ -41,7 +41,7 @@
 	</select>
 	
 	<insert id="merge" parameterType="com.xixi.bet.bean.TaskWatermark">
-		INSERT INTO test.task_watermark(
+		INSERT INTO test.t_crawler_task_watermark(
 			TASK_NAME,
 			TASK_CLASS, 
 			CRON_EXPRESS, 
@@ -59,14 +59,14 @@
 	</insert>
 	
 	<update id="updateExecutedTimeByTaskClass" parameterType="map">
-		UPDATE test.task_watermark
+		UPDATE test.t_crawler_task_watermark
 		SET LAST_EXECUTED = #{LAST_EXECUTED},
 			NEXT_EXECUTE = #{NEXT_EXECUTE}
 		WHERE  TASK_CLASS = #{TASK_CLASS}
 	</update>
 	
 	<update id="updateExecutedTimeByTask" parameterType="com.xixi.bet.bean.TaskWatermark">
-		UPDATE test.task_watermark
+		UPDATE test.t_crawler_task_watermark
 		SET LAST_EXECUTED = #{NEXT_EXECUTE}
 			NEXT_EXECUTE = date_add(#{NEXT_EXECUTE}, interval ${PERIOD_VALUE} ${PERIOD_UNIT})
 		WHERE  TASK_CLASS = #{TASK_CLASS}
@@ -81,6 +81,6 @@
 			REMARK remark,
 			PERIOD_VALUE periodValue,
 			PERIOD_UNIT periodUnit
-			from test.task_watermark
+			from test.t_crawler_task_watermark
 	</select>
 </mapper>

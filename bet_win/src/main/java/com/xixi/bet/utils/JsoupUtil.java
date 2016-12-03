@@ -21,14 +21,17 @@ public class JsoupUtil {
 	//提供本地线程变量，同时提供一个默认的connection对象，并赋予一些常用属性
 	private static final ThreadLocal<Connection> connBean = new ThreadLocal<Connection>(){
 	    protected Connection initialValue() {
-	    	Connection conn = Jsoup.connect("http://zq.win007.com/");
-	    	conn.header("user-agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:38.0) Gecko/20100101 Firefox/38.0");
-	    	conn.header("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-	    	conn.header("accept-language", "zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3");
+	    	Connection conn = Jsoup.connect("http://www.win007.com/");
+	    	conn.header("user-agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36");
+	    	conn.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+	    	conn.header("Accept-Language", "zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3");
+			conn.header("Accept-Encoding", "gzip, deflate, sdch");
+			conn.header("Cache-Control", "no-cache");
 	    	conn.header("connection", "keep-alive");
-	    	conn.header("referer", "http://live3.win007.com/");
-	    	conn.header("host", "live3.win007.com");
-	    	conn.header("Cookie", "Bet007live_hiddenID=_; Bet007live_concernId=_1147424_1231608_1218512_; Cookie=2^0^1^1^1^1^1^0^0^0^0^0^1^2^1^1^1; detailCookie=null");
+	    	conn.header("host", "op1.win007.com");
+			conn.header("Pragma", "no-cache");
+			conn.header("Upgrade-Insecure-Requests", "1");
+	    	conn.header("Cookie", "bskbetCookie=null; ASP.NET_SessionId=vx44y0i5ber3en55rfvyu555");
 	    	conn.ignoreContentType(true);
 	    	conn.timeout(30000);
 	        return conn;
