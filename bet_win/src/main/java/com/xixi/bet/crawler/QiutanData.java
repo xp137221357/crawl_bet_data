@@ -69,59 +69,72 @@ public class QiutanData {
 			Long minNumber=new Long(256999);
 			Long orderNumber= map==null?minNumber:(Long) map.get("schedule_id");
 			orderNumber=orderNumber>minNumber?orderNumber:minNumber;
-			orderNumber++;
-			String url= String.format(SysConfig.getProperty("qiutan.data.url.formatter"), orderNumber);
-			Elements urlEles = getUrlConnect(url,"script");
-			String targetUrl="";
-			for(Element ele : urlEles){
-				String str=ele.select("script").get(0).attr("src");
-				if(str.contains("/data1x2/")){
-					targetUrl=str;
-					break;
-				}
-			}
-			targetUrl = "http://nba.win007.com"+targetUrl;
-			try {
-				Elements eles = getUrlConnect(targetUrl,"body");
-				if(eles.size()==0 || eles.get(0).html().equals("")){
-					return;
-				}
-				for(Element ele : eles){
-					if(!ele.html().contains("game=Array")){
+			LoggerUtil.info(CLASSNAME,"---xiaopan-----orderNumber1111111="+orderNumber);
+            int tryNumber=0;
+			while(true) {
+				orderNumber++;
+				String url = String.format(SysConfig.getProperty("qiutan.data.url.formatter"), orderNumber);
+				Elements urlEles = getUrlConnect(url, "script");
+				if(urlEles==null || urlEles.size()==0){
+					if(tryNumber>10){
+						return;
+					}else{
+						tryNumber++;
 						continue;
 					}
-					String content = ele.select("body").html();
-					BetDataValidate betDataValidate =new BetDataValidate();
-					int resutlValidate=betDataValidate.validateBetData(content);
-					if(resutlValidate<0){
-						LoggerUtil.error(CLASSNAME,"数据验证发生错误");
+				}
+				tryNumber=0;
+				String targetUrl = "";
+				for (Element ele : urlEles) {
+					String str = ele.select("script").get(0).attr("src");
+					if (str.contains("/data1x2/")) {
+						targetUrl = str;
+						break;
+					}
+				}
+				targetUrl = "http://nba.win007.com" + targetUrl;
+				try {
+					Elements eles = getUrlConnect(targetUrl, "body");
+					if (eles==null || eles.size() == 0 || eles.get(0).html().equals("")) {
 						return;
 					}
-					String[] itemArr = parseQiutanData(content,engine);
-					String[] itemInfoArr = parseMatchInfo(content,engine);
-					String scheduleID=itemInfoArr[3];
-					itemInfoArr[2]=parseTime(itemInfoArr[2]);
-					if(itemArr == null || itemArr.length == 0){
-						continue;
-					}
-					for(String str:itemArr){
-						if(getWordsCount(str,"|")!=19){
+					for (Element ele : eles) {
+						if (!ele.html().contains("game=Array")) {
 							continue;
 						}
-						String [] strArr=str.split("\\|");
-						strArr[15]=parseTime(strArr[15]);
-						qiutanDataDao.insertQiutanData(transQiutanArrToQiutanData(strArr,scheduleID));
+						String content = ele.select("body").html();
+						BetDataValidate betDataValidate = new BetDataValidate();
+						int resutlValidate = betDataValidate.validateBetData(content);
+						if (resutlValidate < 0) {
+							LoggerUtil.error(CLASSNAME, "数据验证发生错误");
+							return;
+						}
+						String[] itemArr = parseQiutanData(content, engine);
+						String[] itemInfoArr = parseMatchInfo(content, engine);
+						String scheduleID = itemInfoArr[3];
+						itemInfoArr[2] = parseTime(itemInfoArr[2]);
+						if (itemArr == null || itemArr.length == 0) {
+							continue;
+						}
+						for (String str : itemArr) {
+							if (getWordsCount(str, "|") != 19) {
+								continue;
+							}
+							String[] strArr = str.split("\\|");
+							strArr[15] = parseTime(strArr[15]);
+							qiutanDataDao.insertQiutanData(transQiutanArrToQiutanData(strArr, scheduleID));
+						}
+						qiutanDataDao.insertQiutanMatchInfo(transQiutanMatchArrToQiutanMatchInfo(itemInfoArr));
 					}
-					qiutanDataDao.insertQiutanMatchInfo(transQiutanMatchArrToQiutanMatchInfo(itemInfoArr));
+				} catch (Throwable e) {
+					LoggerUtil.error(CLASSNAME, "爬取出错" + url, e);
 				}
-			} catch (Throwable e) {
-				LoggerUtil.error(CLASSNAME,"爬取出错"+url,e);
 			}
             // 文件持久化设置
 			/*FileUtil.serializeObjByJson(SysConfig.getProperty("data.persistence.rootpath") +
 					SysConfig.getProperty("data.persistence.subpath.cmfb")
 					.replace("{date}", Constants.FILE_DATE_FORMAT.get().format(DateUtil.getStockRealDate())), CMFBBeanList);*/
-			TaskManager.refreshTaskWatermark(getClass(), DateUtil.getStockRealDate());
+            //TaskManager.refreshTaskWatermark(getClass(), DateUtil.getStockRealDate());
 		}catch(Throwable e){
 			LoggerUtil.error(CLASSNAME,"爬取球探数据时发生异常:",e);
 		}
