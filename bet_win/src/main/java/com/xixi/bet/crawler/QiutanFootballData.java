@@ -38,6 +38,7 @@ public class QiutanFootballData {
 	protected static String CLASSNAME="com.xixi.bet.crawler.QiutanFootballData";
 	private int sleepTime=100;
 	private static final int ONE_SECOND=1000;
+	private static final int MAX_TRY_NUMBER=100;
 
 	@Autowired
 	@Qualifier("qiutanFootballDataDao")
@@ -78,23 +79,24 @@ public class QiutanFootballData {
 					sleepTime=100;
 				}
 				Thread.sleep(sleepTime);
-
-				String targetUrl = getTargetUrl(orderNumber);
+				String targetUrl="";
+				/*
+				targetUrl = getTargetUrl(orderNumber);
 				if(targetUrl==null || targetUrl.equals("")){
-					if(tryNumber>10){
+					if(tryNumber>MAX_TRY_NUMBER){
 						return;
 					}else{
 						tryNumber++;
 						continue;
 					}
 				}
-				tryNumber=0;
+				tryNumber=0;*/
 
 				targetUrl=String.format("http://1x2.nowscore.com/%s.js", orderNumber);
 				try {
 					Elements eles = getUrlConnect(targetUrl, "body");
 					if (eles==null || eles.size() == 0 || eles.get(0).html().equals("")) {
-						if(tryNumber>10){
+						if(tryNumber>MAX_TRY_NUMBER){
 							return;
 						}else{
 							tryNumber++;

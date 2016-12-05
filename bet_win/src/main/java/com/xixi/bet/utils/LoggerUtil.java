@@ -14,14 +14,13 @@ public class LoggerUtil {
         Logger LOG = LoggerFactory.getLogger(className);
         String title="An error occurred when excute "+className;
         String content="Reason:"+ reason +";Error:"+e;
-        MailUtil.sendErroeToMail(title,content);
         if(DEBUG){
             if(e==null){
                 LOG.error(reason);
             }else{
                 LOG.error(reason,e);
             }
-
+            MailUtil.sendErroeToMail(title,content);
         }
     }
 

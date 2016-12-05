@@ -38,6 +38,7 @@ public class QiutanData {
 	protected static String CLASSNAME="com.xixi.bet.crawler.QiutanData";
 	private int sleepTime=100;
 	private static final int ONE_SECOND=1000;
+	private static final int MAX_TRY_NUMBER=100;
 	
 	@Autowired
 	@Qualifier("qiutanDataDao")
@@ -80,7 +81,7 @@ public class QiutanData {
 
 				String targetUrl = getTargetUrl(orderNumber);
 				if(targetUrl==null || targetUrl.equals("")){
-					if(tryNumber>10){
+					if(tryNumber>MAX_TRY_NUMBER){
 						return;
 					}else{
 						tryNumber++;
@@ -93,12 +94,7 @@ public class QiutanData {
 				try {
 					Elements eles = getUrlConnect(targetUrl, "body");
 					if (eles==null || eles.size() == 0 || eles.get(0).html().equals("")) {
-						if(tryNumber>10){
 							return;
-						}else{
-							tryNumber++;
-							continue;
-						}
 					}
 					for (Element ele : eles) {
 						if (!ele.html().contains("game=Array")) {
