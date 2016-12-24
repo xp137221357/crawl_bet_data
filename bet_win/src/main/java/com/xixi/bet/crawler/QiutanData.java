@@ -13,6 +13,7 @@ import com.xixi.bet.bean.QiutanDataBean;
 import com.xixi.bet.bean.QiutanMatchInfoBean;
 import com.xixi.bet.dao.QiutanDataDao;
 import com.xixi.bet.utils.*;
+import com.xixi.bet.validate.BasketballDataValidate;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

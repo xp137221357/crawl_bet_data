@@ -1,4 +1,4 @@
-package com.xixi.bet.utils;
+package com.xixi.bet.validate;
 
 /**
  * Created by Administrator on 2016/12/2.

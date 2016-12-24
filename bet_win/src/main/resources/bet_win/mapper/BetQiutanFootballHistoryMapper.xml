@@ -9,7 +9,7 @@
 		select max(schedule_id) schedule_id from test.t_bet_match_football_info
 	</select>
 
-	<insert id="insertQiutanFootballHistoryData" parameterType="com.xixi.bet.bean.QiutanFootballHistoryDataBean">
+	<insert id="insertQiutanData" parameterType="com.xixi.bet.bean.QiutanFootballDataBean">
 		INSERT INTO test.t_bet_match_football_data(
 		schedule_id,
 		value0,
